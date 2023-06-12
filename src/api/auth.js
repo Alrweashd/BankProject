@@ -23,7 +23,6 @@ const register = async (userInfo) => {
     console.log(data.access);
     return data;
   } catch (error) {
-    console.log("t", userInfo);
     if (error.response.data.details.password) {
       alert(
         "Password must at least 8 digits with a combination of numbers and letters"
@@ -34,22 +33,32 @@ const register = async (userInfo) => {
 
 const me = async () => {
   try {
-    const { data } = await instance.get("/auth/me");
+    const { data } = await instance.get("/auth/v3/profile");
+
     return data;
   } catch (error) {
     console.log(error);
   }
 };
 
-// const getAllUsers = async () => {
-//   try {
-//     const { data } = await instance.get("/auth/users");
-//     return data;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+const balance = async () => {
+  try {
+    const { data } = await instance.get("/bank/v3/balance");
+    return data.balance;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
+const transactions = async () => {
+  try {
+    const { data } = await instance.get("auth/v3/transactions");
+    console.log("ttransactions", data);
+    return data.transactions;
+  } catch (error) {
+    console.log(error);
+  }
+};
 const storeToken = (token) => {
   localStorage.setItem("token", token);
 };
@@ -58,7 +67,7 @@ const checkToken = () => {
   const token = localStorage.getItem("token");
   if (token) {
     const decoded = jwt_decode(token);
-    if (decoded.exp < Date.now()) {
+    if (decoded.exp < Date.now() / 1000) {
       return false;
     }
     return true;
@@ -70,4 +79,13 @@ const logout = () => {
   localStorage.removeItem("token");
 };
 
-export { login, register, me, storeToken, checkToken, logout };
+export {
+  login,
+  register,
+  me,
+  storeToken,
+  checkToken,
+  logout,
+  balance,
+  transactions,
+};

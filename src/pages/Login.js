@@ -14,8 +14,10 @@ const Login = () => {
   const { mutate: loginFn } = useMutation({
     mutationFn: () => login(userInfo),
     onSuccess: () => {
-      setUser(true);
-      navigate("/");
+      if (localStorage.getItem("token")) {
+        setUser(true);
+        navigate("/");
+      }
     },
   });
   const handleChange = (e) => {
