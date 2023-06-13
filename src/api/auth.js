@@ -1,4 +1,3 @@
-import { Navigate, useNavigate } from "react-router-dom";
 import instance from ".";
 import jwt_decode from "jwt-decode";
 
@@ -6,7 +5,7 @@ const login = async (userInfo) => {
   try {
     const { data } = await instance.post("/auth/v3/login", userInfo);
     storeToken(data.access);
-    console.log(data);
+    // console.log(data);
     return data;
   } catch (error) {
     console.log(error);
@@ -20,35 +19,66 @@ const register = async (userInfo) => {
     const { data } = await instance.post("/auth/v3/register", formData);
     storeToken(data.access);
 
-    console.log(data.access);
     return data;
   } catch (error) {
-    console.log("t", userInfo);
-    if (error.response.data.details.password) {
+    if (error.response.data.details?.password.includes("/[a-zA-Z0-9]{8,30}/")) {
       alert(
         "Password must at least 8 digits with a combination of numbers and letters"
       );
+    }
+    if (error.response.data.message?.includes("E11000 duplicate key error")) {
+      alert("Username already exists, please use another username");
     }
   }
 };
 
 const me = async () => {
   try {
-    const { data } = await instance.get("/auth/me");
+    const { data } = await instance.get("/auth/v3/profile");
+
     return data;
   } catch (error) {
     console.log(error);
   }
 };
 
-// const getAllUsers = async () => {
-//   try {
-//     const { data } = await instance.get("/auth/users");
-//     return data;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+const balance = async () => {
+  try {
+    const { data } = await instance.get("/bank/v3/balance");
+
+    return data.balance;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const transactions = async () => {
+  try {
+    const { data } = await instance.get("/bank/v3/transactions");
+    console.log(data[0]);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const deposit = async (amount) => {
+  try {
+    const { data } = await instance.post("/bank/v3/deposit", { amount });
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getUsers = async () => {
+  try {
+    const { data } = await instance.get("/auth/v3/users");
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const storeToken = (token) => {
   localStorage.setItem("token", token);
@@ -58,7 +88,9 @@ const checkToken = () => {
   const token = localStorage.getItem("token");
   if (token) {
     const decoded = jwt_decode(token);
-    if (decoded.exp < Date.now()) {
+    const cureentTime = Date.now() / 1000;
+    if (decoded.exp < cureentTime) {
+      localStorage.removeItem("token");
       return false;
     }
     return true;
@@ -70,4 +102,15 @@ const logout = () => {
   localStorage.removeItem("token");
 };
 
-export { login, register, me, storeToken, checkToken, logout };
+export {
+  login,
+  register,
+  me,
+  storeToken,
+  checkToken,
+  logout,
+  balance,
+  transactions,
+  getUsers,
+  deposit,
+};

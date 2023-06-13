@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { checkToken, register } from "../api/auth";
-import { Navigate, useNavigate } from "react-router-dom";
+import { register } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext";
 
 const Register = () => {
