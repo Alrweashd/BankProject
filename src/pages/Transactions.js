@@ -12,16 +12,20 @@ const Transactions = () => {
   //   } = transactionsData;
   //   console.log(transactionsData);
   //   if (!transactionsData) return <div>not found!</div>;
+
+  const { data: transactionsData } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: () => transactions(),
+  });
+
+  const transactionsList = transactionsData.map((transaction, index) => {
+    <h1>{transaction[0]}</h1>;
+  });
+
   return (
-    <div>
-      <div className="border-gray-500 border-2 border-opacity-25 shadow m-10">
-        {/* <button onClick={transactionsFun}>Refresh transactions</button>
-        <h1></h1>
-        <h1 className="m-2">{`account: ${accountTransc} `}</h1>
-        <h1 className="m-2">{` Created At: ${createdAt} `}</h1>
-        <h1 className="m-2"> {` Username: ${usernameTransc}`}</h1> */}
-      </div>
-    </div>
+    <>
+      <h1 className="m-2">{`transactionsData: ${transactionsList} `}</h1>
+    </>
   );
 };
 

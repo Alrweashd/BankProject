@@ -5,7 +5,7 @@ const login = async (userInfo) => {
   try {
     const { data } = await instance.post("/auth/v3/login", userInfo);
     storeToken(data.access);
-    console.log(data);
+    // console.log(data);
     return data;
   } catch (error) {
     console.log(error);
@@ -54,16 +54,17 @@ const balance = async () => {
 
 const transactions = async () => {
   try {
-    const { data } = await instance.get("/auth/v3/transactions");
+    const { data } = await instance.get("/bank/v3/transactions");
+    console.log(data[0]);
     return data;
   } catch (error) {
     console.log(error);
   }
 };
 
-const deposit = async () => {
+const deposit = async (amount) => {
   try {
-    const { data } = await instance.post("/auth/v3/deposit");
+    const { data } = await instance.post("/bank/v3/deposit", { amount });
     return data;
   } catch (error) {
     console.log(error);
