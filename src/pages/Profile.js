@@ -18,7 +18,7 @@ const Profile = () => {
     onSuccess: () => queryClient.invalidateQueries(["profile"]),
   });
 
-  const { data: balanceData } = useQuery({
+  let { data: balanceData } = useQuery({
     queryKey: ["balance"],
     queryFn: () => balance(),
   });
@@ -36,6 +36,13 @@ const Profile = () => {
   const { mutate: transactionsFun } = useMutation({
     mutationFn: () => login(),
     onSuccess: () => queryClient.invalidateQueries(["transactions"]),
+  });
+
+  const { mutate: depositFun } = useMutation({
+    mutationFn: () => {
+      balanceData += 1;
+    },
+    onSuccess: () => queryClient.invalidateQueries(["balance"]),
   });
   console.log("this is profile", profile);
   console.log("this is transactions", transactionsData);
@@ -80,6 +87,7 @@ const Profile = () => {
       >
         {`Balance: ${balanceData}`}
       </button>
+      <button onClick={depositFun}>Add 1</button>
       <button onClick={transactionsFun}>Refresh transactions</button>
 
       <h1 className="m-2">{`transactionsData: ${transactionsData} `}</h1>

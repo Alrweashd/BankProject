@@ -60,6 +60,16 @@ const transactions = async () => {
     console.log(error);
   }
 };
+
+const deposit = async () => {
+  try {
+    const { data } = await instance.post("/auth/v3/deposit");
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const getUsers = async () => {
   try {
     const { data } = await instance.get("/auth/v3/users");
@@ -101,4 +111,5 @@ export {
   balance,
   transactions,
   getUsers,
+  deposit,
 };
