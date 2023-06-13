@@ -21,10 +21,13 @@ const register = async (userInfo) => {
 
     return data;
   } catch (error) {
-    if (error.response.data.details.password) {
+    if (error.response.data.details?.password.includes("/[a-zA-Z0-9]{8,30}/")) {
       alert(
         "Password must at least 8 digits with a combination of numbers and letters"
       );
+    }
+    if (error.response.data.message?.includes("E11000 duplicate key error")) {
+      alert("Username already exists, please use another username");
     }
   }
 };
@@ -42,6 +45,7 @@ const me = async () => {
 const balance = async () => {
   try {
     const { data } = await instance.get("/bank/v3/balance");
+
     return data.balance;
   } catch (error) {
     console.log(error);
@@ -50,18 +54,15 @@ const balance = async () => {
 
 const transactions = async () => {
   try {
-    const { data } = await instance.get("auth/v3/transactions");
-    console.log("ttransactions", data);
-    return data.transactions;
+    const { data } = await instance.get("/auth/v3/transactions");
+    return data;
   } catch (error) {
     console.log(error);
   }
 };
-
 const getUsers = async () => {
   try {
-    const { data } = await instance.get("auth/v3/users");
-    console.log("usersss", data);
+    const { data } = await instance.get("/auth/v3/users");
     return data;
   } catch (error) {
     console.log(error);
