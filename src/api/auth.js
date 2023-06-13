@@ -1,4 +1,3 @@
-import { Navigate, useNavigate } from "react-router-dom";
 import instance from ".";
 import jwt_decode from "jwt-decode";
 
@@ -20,7 +19,6 @@ const register = async (userInfo) => {
     const { data } = await instance.post("/auth/v3/register", formData);
     storeToken(data.access);
 
-    console.log(data.access);
     return data;
   } catch (error) {
     if (error.response.data.details.password) {
@@ -59,6 +57,17 @@ const transactions = async () => {
     console.log(error);
   }
 };
+
+const getUsers = async () => {
+  try {
+    const { data } = await instance.get("auth/v3/users");
+    console.log("usersss", data);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const storeToken = (token) => {
   localStorage.setItem("token", token);
 };
@@ -67,7 +76,9 @@ const checkToken = () => {
   const token = localStorage.getItem("token");
   if (token) {
     const decoded = jwt_decode(token);
-    if (decoded.exp < Date.now() / 1000) {
+    const cureentTime = Date.now() / 1000;
+    if (decoded.exp < cureentTime) {
+      localStorage.removeItem("token");
       return false;
     }
     return true;
@@ -88,4 +99,5 @@ export {
   logout,
   balance,
   transactions,
+  getUsers,
 };
