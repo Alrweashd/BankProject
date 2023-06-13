@@ -70,6 +70,16 @@ const deposit = async (amount) => {
     console.log(error);
   }
 };
+const withdrawal = async (amount) => {
+  try {
+    const { data } = await instance.post("/bank/v3/withdraw", { amount });
+    console.log("witdrawal", data);
+    return data;
+  } catch (error) {
+    console.log(error);
+    console.log(error.response);
+  }
+};
 
 const getUsers = async () => {
   try {
@@ -113,4 +123,5 @@ export {
   transactions,
   getUsers,
   deposit,
+  withdrawal,
 };

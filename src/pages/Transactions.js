@@ -18,10 +18,8 @@ const Transactions = () => {
     queryFn: () => transactions(),
   });
   // const { type } = transactionsData;
-  const transactionsList = transactionsData?.map((transaction, index) => {
-    <h1>{transaction.type}</h1>;
-  });
-  // console.log(type);
+
+  console.log(transactionsData);
   return (
     <>
       <h1 className="m-2">
@@ -30,11 +28,26 @@ const Transactions = () => {
             <h1 key={transaction.id}>{transaction.title}</h1>
           ))} */}
         {transactionsData && (
-          <h1>
-            {transactionsData.map((item) => (
-              <h1>{item.type}</h1>
-            ))}
-          </h1>
+          <>
+            <table className="min-w-full text-center bg-white border border-gray-300">
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 border-b">Type</th>
+                  <th className="py-2 px-4 border-b">Amount</th>
+                  <th className="py-2 px-4 border-b">Account</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactionsData.map((item) => (
+                  <tr>
+                    <td className="py-2 px-4 border-b">{item.type}</td>
+                    <td className="py-2 px-4 border-b">{item.amount}</td>
+                    <td className="py-2 px-4 border-b">{item.account}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </h1>
     </>

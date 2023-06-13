@@ -1,5 +1,12 @@
 import React, { useContext, useState } from "react";
-import { login, me, balance, transactions, deposit } from "../api/auth";
+import {
+  login,
+  me,
+  balance,
+  transactions,
+  deposit,
+  withdrawal,
+} from "../api/auth";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -33,6 +40,19 @@ const Profile = () => {
     onSuccess: () => queryClient.invalidateQueries(["balance"]),
   });
 
+  const [amountWit, setAmountWit] = useState(0);
+  const handleWit = (event) => {
+    event.preventDefault();
+    const amountWit = event.target.amountWit.value;
+    setAmountWit(amountWit);
+  };
+
+  const { mutate: withdrawalFun } = useMutation({
+    mutationFn: () => {
+      return withdrawal(amountWit);
+    },
+    onSuccess: () => queryClient.invalidateQueries(["balance"]),
+  });
   // const { data: transactionsData } = useQuery({
   //   queryKey: ["transactions"],
   //   queryFn: () => transactions(),
@@ -57,9 +77,16 @@ const Profile = () => {
   //     queryClient.invalidateQueries(["balance"]);
   //   },
   // });
+  const [amount, setAmount] = useState(0);
+  const handleAddFunds = (event) => {
+    event.preventDefault();
+    const amount = event.target.amount.value;
+    setAmount(amount);
+  };
+
   const { mutate: depositFun } = useMutation({
     mutationFn: () => {
-      return deposit(1);
+      return deposit(amount);
     },
     onSuccess: () => {
       console.log("first");
@@ -92,20 +119,10 @@ const Profile = () => {
   //   username: usernameTransc,
   // } = transactionsData;
   const { username, account, image } = profile;
-  // const handleAddFunds = (event) => {
-  //   event.preventDefault();
-  //   const amount = event.target.amount.value;
-  //   // depositFun(amount);
-  // };
+
   console.table(balanceData);
   return (
     <div className="flex flex-col justify-center text-center m-10">
-      <button
-        className="place-self-center border-solid rounded-full bg-blue-800 w-20 text-white"
-        onClick={meFun}
-      >
-        Refresh
-      </button>
       <h1 className="m-10 font-bold">{`Name: ${username}`}</h1>
       <h1>{`Account: ${account}`}</h1>
       <img
@@ -118,27 +135,47 @@ const Profile = () => {
           balanceFun();
           navigate("/transactions");
         }}
-        className="place-self-center h-20 w-[10vh] border-solid rounded bg-green-800 w-20 text-white"
+        className="place-self-center h-20 w-[30vh] border-solid rounded bg-gray-800 text-white mb-5"
       >
-        {`Balance: ${balanceData}`}
+        {`Balance: ${balanceData} KD`}
       </button>
-      {/* <button onClick={depositFun}>Add 1 to Balance</button> */}
-      {/* <button onClick={transactionsFun}>Refresh transactions Button</button>
-      <form onSubmit={handleAddFunds}>
+      <form onSubmit={handleAddFunds} className="mb-4">
         <label htmlFor="amount">Amount:</label>
         <input
-          className="bg-gray-400"
+          className="bg-gray-300"
           type="number"
           id="amount"
           name="amount"
           required
         />
-        <button type="submit" disabled={depositFun.isLoading}>
+        <button
+          type="submit"
+          onClick={depositFun}
+          disabled={depositFun.isLoading}
+          className="w-[15vh] h-[3vh] border-solid rounded bg-green-800 mt-2 text-white"
+        >
           Add Funds
         </button>
-      </form> */}
-      <button onClick={depositFun}>Add 1</button>
-      {/* <h1 className="m-2">{`transactionsData: ${transactionsData} `}</h1> */}
+      </form>
+      <form onSubmit={handleWit}>
+        <label htmlFor="amount">Amount:</label>
+        <input
+          className="bg-gray-300"
+          type="number"
+          id="amount"
+          name="amountWit"
+          required
+        />
+        <button
+          type="submit"
+          onClick={withdrawalFun}
+          disabled={withdrawalFun.isLoading}
+          className="w-[15vh] h-[3vh] border-solid rounded bg-red-800 mt-2 text-white"
+        >
+          Withdrawal
+        </button>
+      </form>
+      {/* <button onClick={withdrawalFun}>Reduce 1</button> */}
     </div>
   );
 };
