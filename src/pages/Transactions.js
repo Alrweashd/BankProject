@@ -17,14 +17,26 @@ const Transactions = () => {
     queryKey: ["transactions"],
     queryFn: () => transactions(),
   });
-
-  const transactionsList = transactionsData.map((transaction, index) => {
-    <h1>{transaction[0]}</h1>;
+  // const { type } = transactionsData;
+  const transactionsList = transactionsData?.map((transaction, index) => {
+    <h1>{transaction.type}</h1>;
   });
-
+  // console.log(type);
   return (
     <>
-      <h1 className="m-2">{`transactionsData: ${transactionsList} `}</h1>
+      <h1 className="m-2">
+        {/* {transactionsData &&
+          transactionsData?.map((transaction) => (
+            <h1 key={transaction.id}>{transaction.title}</h1>
+          ))} */}
+        {transactionsData && (
+          <h1>
+            {transactionsData.map((item) => (
+              <h1>{item.type}</h1>
+            ))}
+          </h1>
+        )}
+      </h1>
     </>
   );
 };
