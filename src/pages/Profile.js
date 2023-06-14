@@ -67,18 +67,6 @@ const Profile = () => {
     },
   });
 
-  // console.log(dData);
-  // const depositFun = dData.mutate;
-  // console.log("this is profile", profile);
-  // console.log("this is transactions", transactionsData);
-  // console.log("this is balance", balanceData);
-
-  // console.log("this is balance", balanceData);
-  // const { data: transactionsData } = useQuery({
-  //   queryKey: ["transactions"],
-  //   queryFn: () => transactions(),
-  // });
-
   //   const profiles = profile.data?.map((item) => {
   //     <h1>{item}</h1>;
   //   });
