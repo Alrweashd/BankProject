@@ -5,10 +5,13 @@ import { me, balance, transactions, login } from "../api/auth";
 const Transactions = () => {
   const queryClient = useQueryClient();
 
+  //For Filtering
   const [amountFilter, setAmountFilter] = useState("");
   const [dateFromFilter, setDateFromFilter] = useState("");
   const [dateToFilter, setDateToFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: transactionsData, refetch } = useQuery({
     queryKey: ["transactions"],
@@ -58,6 +61,15 @@ const Transactions = () => {
     // Refetch data to show all values
     refetch();
   };
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  //Pagination
+  const transactionsPerPage = 20;
+  const startIndex = (currentPage - 1) * transactionsPerPage;
+  const endIndex = startIndex + transactionsPerPage;
+  const paginatedData = transactionsData?.slice(startIndex, endIndex);
   return (
     <>
       {/* //new Code */}
@@ -132,51 +144,61 @@ const Transactions = () => {
           transactionsData?.map((transaction) => (
             <h1 key={transaction.id}>{transaction.title}</h1>
           ))} */}
-        {transactionsData && (
-          <h1>
-            <>
-              <table className="min-w-full text-center bg-white border border-separate border-gray-300 rounded-lg shadow-md">
-                <thead>
-                  <tr>
-                    <th className="py-2 px-4 border-r border-gray-300 ">
-                      Type
-                    </th>
-                    <th className="py-2 px-4 border-r border-gray-300">
-                      Amount
-                    </th>
-                    <th className="py-2 px-4 border-r border-gray-300">
-                      Account
-                    </th>
-                    <th className="py-2 px-4 border-gray-300">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactionsData.map((item) => (
-                    <tr
-                      className={`py-2 px-4 border-b border-r border-r-gray-300 ${
-                        item.type == "deposit" ? "bg-green-200" : "bg-red-200"
-                      }`}
-                    >
-                      <td className="py-2 px-4 border-b border-r border-b-gray-300 border-r-gray-300">
-                        {item.type}
-                      </td>
-                      <td className="py-2 px-4 border-b border-r border-b-gray-300 border-r-gray-300">
-                        {item.amount}
-                      </td>
-                      <td className="py-2 px-4 border-b border-r border-b-gray-300 border-r-gray-300">
-                        {item.account}
-                      </td>
-                      <td className="py-2 px-4 border-b border-b-gray-300">
-                        {item.createdAt.replace(/T|Z/g, " ")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          </h1>
+        {paginatedData && (
+          <table className="min-w-full text-center bg-white border border-separate border-gray-300 rounded-lg shadow-md">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-r border-gray-300 ">Type</th>
+                <th className="py-2 px-4 border-r border-gray-300">Amount</th>
+                <th className="py-2 px-4 border-r border-gray-300">Account</th>
+                <th className="py-2 px-4 border-gray-300">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.map((item) => (
+                <tr
+                  key={item.id}
+                  className={`py-2 px-4 border-b border-r border-r-gray-300 ${
+                    item.type === "deposit" ? "bg-green-200" : "bg-red-200"
+                  }`}
+                >
+                  <td className="py-2 px-4 border-b border-r border-b-gray-300 border-r-gray-300">
+                    {item.type}
+                  </td>
+                  <td className="py-2 px-4 border-b border-r border-b-gray-300 border-r-gray-300">
+                    {item.amount}
+                  </td>
+                  <td className="py-2 px-4 border-b border-r border-b-gray-300 border-r-gray-300">
+                    {item.account}
+                  </td>
+                  <td className="py-2 px-4 border-b border-b-gray-300">
+                    {item.createdAt.replace(/T|Z/g, " ")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </h1>
+      <div className="flex justify-center mt-4">
+        {transactionsData &&
+          Array.from(
+            {
+              length: Math.ceil(transactionsData.length / transactionsPerPage),
+            },
+            (_, i) => i + 1
+          ).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-4 py-2 mb-2 rounded ${
+                page === currentPage ? "bg-blue-500 text-white" : ""
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+      </div>
     </>
   );
 };

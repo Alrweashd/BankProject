@@ -10,6 +10,12 @@ const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useContext(UserContext);
 
+  //For Tabs
+  const [selectedTab, setSelectedTab] = useState("tab1");
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
+  };
+
   // Get profile data
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -72,12 +78,94 @@ const Profile = () => {
         onClick={() => {
           navigate("/transactions");
         }}
-        className="h-20 w-80 bg-gray-800 text-white rounded-full mt-5 flex items-center justify-center hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
+        className="h-20 w-80 mt-4 mb-2 bg-gray-800 text-white rounded-full mt-5 flex items-center justify-center hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
       >
         {`Balance: ${balanceData} KD `}
       </button>
-      <form onSubmit={handleBalanceSubmit} className="mt-4">
-        <label htmlFor="amount" className="mr-2">
+
+      {/* Tabs Starts */}
+
+      <div className="flex flex-col bg-gradient-to-br from-gray-50 to-indigo-200 rounded-md p-4 shadow-xl mt-4">
+        <div className="flex flex-col ">
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => handleTabClick("tab1")}
+              className={`px-4 py-2 mr-2 rounded ${
+                selectedTab === "tab1"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Deposit
+            </button>
+            <button
+              onClick={() => handleTabClick("tab2")}
+              className={`px-4 py-2 rounded ${
+                selectedTab === "tab2"
+                  ? "bg-red-500 hover:bg-red-600  text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Withdraw
+            </button>
+          </div>
+          <div>
+            {selectedTab === "tab1" && (
+              <form onSubmit={handleBalanceSubmit} className="mt-8">
+                <label htmlFor="amount" className="mr-2">
+                  Amount:
+                </label>
+                <input
+                  className="bg-gray-100  px-2 py-1 rounded"
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  placeholder="amount"
+                  required
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  onClick={depositFun}
+                  disabled={depositLoading}
+                  className="w-40 h-9  bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
+                >
+                  {depositLoading ? "Adding Funds..." : "Add Funds"}
+                </button>
+              </form>
+            )}
+            {selectedTab === "tab2" && (
+              <form onSubmit={handleBalanceSubmit} className="mt-8">
+                <label htmlFor="amount" className="mr-2">
+                  Amount:
+                </label>
+                <input
+                  className="bg-gray-100 px-2 py-1 rounded"
+                  placeholder="amount"
+                  type="number"
+                  id="amountWit"
+                  name="amountWit"
+                  required
+                  onChange={(e) => setAmountWit(e.target.value)}
+                />
+
+                <button
+                  type="submit"
+                  onClick={withdrawalFun}
+                  disabled={withdrawalLoading}
+                  className="w-40 h-9  bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
+                >
+                  {withdrawalLoading ? "Withdrawing..." : "Witdrawal"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Ends */}
+
+      {/* <label htmlFor="amount" className="mr-2">
           Amount:
         </label>
         <input
@@ -95,9 +183,9 @@ const Profile = () => {
           className="w-40 h-9  bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
         >
           {depositLoading ? "Adding Funds..." : "Add Funds"}
-        </button>
-      </form>
-      <form onSubmit={handleBalanceSubmit} className="mt-4">
+        </button> */}
+
+      {/* <form onSubmit={handleBalanceSubmit} className="mt-4 mb-24">
         <label htmlFor="amount" className="mr-2">
           Amount:
         </label>
@@ -118,7 +206,7 @@ const Profile = () => {
         >
           {withdrawalLoading ? "Withdrawing..." : "witdrawal"}
         </button>
-      </form>
+      </form> */}
     </div>
   );
 };
