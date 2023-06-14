@@ -15,9 +15,14 @@ const Transactions = () => {
     queryFn: () => transactions(),
   });
 
-  const handleFilter = () => {
+  // Used async await to wait for the transactionsData to be fetched so I won't filter inside a filter
+  const handleFilter = async () => {
+    await refetch();
+    // Get the original transactions data from the queryClient
+    const updatedTransactionsData = queryClient.getQueryData(["transactions"]);
+
     // Filter the transactions based on the provided filters (amount, date range, etc.)
-    const filteredTransactions = transactionsData.filter((item) => {
+    const filteredTransactions = updatedTransactionsData.filter((item) => {
       // Filter by amount (if amountFilter is not empty)
       if (amountFilter && item.amount !== Number(amountFilter)) {
         return false;
@@ -149,7 +154,7 @@ const Transactions = () => {
                   {transactionsData.map((item) => (
                     <tr
                       className={`py-2 px-4 border-b border-r border-r-gray-300 ${
-                        item.type == "withdraw" ? "bg-red" : "bg-green-200"
+                        item.type == "deposit" ? "bg-green-200" : "bg-red-200"
                       }`}
                     >
                       <td className="py-2 px-4 border-b border-r border-b-gray-300 border-r-gray-300">

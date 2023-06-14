@@ -16,7 +16,7 @@ const Login = () => {
     onSuccess: () => {
       if (localStorage.getItem("token")) {
         setUser(true);
-        navigate("/");
+        navigate("/profile");
       }
     },
   });

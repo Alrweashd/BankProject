@@ -1,132 +1,124 @@
 import React, { useContext, useState } from "react";
-import { login, me, balance, transactions, deposit } from "../api/auth";
-
+import { login, me, balance, deposit, withdrawal } from "../api/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext";
+import ProfileCard from "../component/ProfileCard";
 
 const Profile = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [user, setUser] = useContext(UserContext);
 
-  //get profile
+  // Get profile data
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: () => me(),
   });
 
-  const { mutate: meFun } = useMutation({
-    mutationFn: () => login(),
-    onSuccess: () => queryClient.invalidateQueries(["profile"]),
-  });
-
-  //get balance data
-  let { data: balanceData } = useQuery({
+  // Get balance data
+  const { data: balanceData } = useQuery({
     queryKey: ["balance"],
     queryFn: () => balance(),
   });
 
-  //do u
-  const { mutate: balanceFun } = useMutation({
-    mutationFn: () => login(),
-    onSuccess: () => queryClient.invalidateQueries(["balance"]),
-  });
+  // Deposit funds
 
-  // const { data: transactionsData } = useQuery({
-  //   queryKey: ["transactions"],
-  //   queryFn: () => transactions(),
-  // });
-
-  // const { mutate: transactionsFun } = useMutation({
-  //   mutationFn: () => login(),
-  //   onSuccess: () => queryClient.invalidateQueries(["transactions"]),
-  // });
-
-  // let { data: depositData } = useQuery({
-  //   queryKey: ["deposit"],
-  //   queryFn: () => deposit(),
-  // });
-
-  // const dData = useMutation({
-  //   mutationFn: async () => {
-  //     await deposit(1);
-  //   },
-  //   onSuccess: (data) => {
-  //     console.log(dData);
-  //     queryClient.invalidateQueries(["balance"]);
-  //   },
-  // });
-  const { mutate: depositFun } = useMutation({
-    mutationFn: () => {
-      return deposit(1);
-    },
+  const { mutate: depositFun, isLoading: depositLoading } = useMutation({
+    mutationFn: () => deposit(amount),
     onSuccess: () => {
-      console.log("first");
       queryClient.invalidateQueries(["balance"]);
+      setAmount(0);
+      document.getElementById("amount").value = "";
     },
   });
 
-  //   const profiles = profile.data?.map((item) => {
-  //     <h1>{item}</h1>;
-  //   });
+  // Withdraw funds
+  const [amountWit, setAmountWit] = useState(0);
+  const { mutate: withdrawalFun, isLoading: withdrawalLoading } = useMutation({
+    mutationFn: () => withdrawal(amountWit),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["balance"]);
+      setAmountWit(0);
+      document.getElementById("amountWit").value = "";
+    },
+  });
+  const [amount, setAmount] = useState(0);
+  const handleBalanceSubmit = (e) => {
+    e.preventDefault();
+    // console.log(e.target.amount.value);
+  };
+
   if (!user) return <Navigate to="/" />;
   if (!profile) return <div>not found!</div>;
-  //   if (!balanceData) return <div>not found!</div>;
-  // if (!transactionsData) return <div>not found!</div>;
-  // const {
-  //   account: accountTransc,
-  //   createdAt,
-  //   username: usernameTransc,
-  // } = transactionsData;
+
   const { username, account, image } = profile;
-  // const handleAddFunds = (event) => {
-  //   event.preventDefault();
-  //   const amount = event.target.amount.value;
-  //   // depositFun(amount);
-  // };
-  console.table(balanceData);
+
   return (
-    <div className="flex flex-col justify-center text-center m-10">
-      <button
-        className="place-self-center border-solid rounded-full bg-blue-800 w-20 text-white"
-        onClick={meFun}
-      >
-        Refresh
-      </button>
-      <h1 className="m-10 font-bold">{`Name: ${username}`}</h1>
-      <h1>{`Account: ${account}`}</h1>
-      <img
-        className="place-self-center m-10 w-[280px] h-[280px]"
-        src={`https://coded-projects-api.herokuapp.com${image}`}
-        alt="img"
-      />
-      <button
+    <div className="flex flex-col justify-center items-center  bg-gradient-to-r from-blue-300 to-indigo-400 min-h-screen">
+      {/* <div
         onClick={() => {
-          balanceFun();
           navigate("/transactions");
         }}
-        className="place-self-center h-20 w-[10vh] border-solid rounded bg-green-800 w-20 text-white"
+      > */}
+      <ProfileCard
+        username={username}
+        account={account}
+        image={image}
+        balance={balanceData}
+      />
+      {/* </div> */}
+      <button
+        onClick={() => {
+          navigate("/transactions");
+        }}
+        className="h-20 w-80 bg-gray-800 text-white rounded-full mt-5 flex items-center justify-center hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
       >
-        {`Balance: ${balanceData}`}
+        {`Balance: ${balanceData} KD `}
       </button>
-      {/* <button onClick={depositFun}>Add 1 to Balance</button> */}
-      {/* <button onClick={transactionsFun}>Refresh transactions Button</button>
-      <form onSubmit={handleAddFunds}>
-        <label htmlFor="amount">Amount:</label>
+      <form onSubmit={handleBalanceSubmit} className="mt-4">
+        <label htmlFor="amount" className="mr-2">
+          Amount:
+        </label>
         <input
-          className="bg-gray-400"
+          className="bg-gray-100 px-2 py-1 rounded"
           type="number"
           id="amount"
           name="amount"
           required
+          onChange={(e) => setAmount(e.target.value)}
         />
-        <button type="submit" disabled={depositFun.isLoading}>
-          Add Funds
+        <button
+          type="submit"
+          onClick={depositFun}
+          disabled={depositLoading}
+          className="w-40 h-9  bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
+        >
+          {depositLoading ? "Adding Funds..." : "Add Funds"}
         </button>
-      </form> */}
-      <button onClick={depositFun}>Add 1</button>
-      {/* <h1 className="m-2">{`transactionsData: ${transactionsData} `}</h1> */}
+      </form>
+      <form onSubmit={handleBalanceSubmit} className="mt-4">
+        <label htmlFor="amount" className="mr-2">
+          Amount:
+        </label>
+        <input
+          className="bg-gray-100 px-2 py-1 rounded"
+          type="number"
+          id="amountWit"
+          name="amountWit"
+          required
+          onChange={(e) => setAmountWit(e.target.value)}
+        />
+
+        <button
+          type="submit"
+          onClick={withdrawalFun}
+          disabled={withdrawalLoading}
+          className="w-40 h-9  bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
+        >
+          {withdrawalLoading ? "Withdrawing..." : "witdrawal"}
+        </button>
+      </form>
     </div>
   );
 };
