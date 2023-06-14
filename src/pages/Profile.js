@@ -1,181 +1,212 @@
 import React, { useContext, useState } from "react";
-import {
-  login,
-  me,
-  balance,
-  transactions,
-  deposit,
-  withdrawal,
-} from "../api/auth";
-
+import { login, me, balance, deposit, withdrawal } from "../api/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext";
+import ProfileCard from "../component/ProfileCard";
 
 const Profile = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [user, setUser] = useContext(UserContext);
 
-  //get profile
+  //For Tabs
+  const [selectedTab, setSelectedTab] = useState("tab1");
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
+  };
+
+  // Get profile data
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: () => me(),
   });
 
-  const { mutate: meFun } = useMutation({
-    mutationFn: () => login(),
-    onSuccess: () => queryClient.invalidateQueries(["profile"]),
-  });
-
-  //get balance data
-  let { data: balanceData } = useQuery({
+  // Get balance data
+  const { data: balanceData } = useQuery({
     queryKey: ["balance"],
     queryFn: () => balance(),
   });
 
-  //do u
-  const { mutate: balanceFun } = useMutation({
-    mutationFn: () => login(),
-    onSuccess: () => queryClient.invalidateQueries(["balance"]),
-  });
+  // Deposit funds
 
-  const [amountWit, setAmountWit] = useState(0);
-  const handleWit = (event) => {
-    event.preventDefault();
-    const amountWit = event.target.amountWit.value;
-    setAmountWit(amountWit);
-  };
-
-  const { mutate: withdrawalFun } = useMutation({
-    mutationFn: () => {
-      return withdrawal(amountWit);
-    },
-    onSuccess: () => queryClient.invalidateQueries(["balance"]),
-  });
-  // const { data: transactionsData } = useQuery({
-  //   queryKey: ["transactions"],
-  //   queryFn: () => transactions(),
-  // });
-
-  // const { mutate: transactionsFun } = useMutation({
-  //   mutationFn: () => login(),
-  //   onSuccess: () => queryClient.invalidateQueries(["transactions"]),
-  // });
-
-  // let { data: depositData } = useQuery({
-  //   queryKey: ["deposit"],
-  //   queryFn: () => deposit(),
-  // });
-
-  // const dData = useMutation({
-  //   mutationFn: async () => {
-  //     await deposit(1);
-  //   },
-  //   onSuccess: (data) => {
-  //     console.log(dData);
-  //     queryClient.invalidateQueries(["balance"]);
-  //   },
-  // });
-  const [amount, setAmount] = useState(0);
-  const handleAddFunds = (event) => {
-    event.preventDefault();
-    const amount = event.target.amount.value;
-    setAmount(amount);
-  };
-
-  const { mutate: depositFun } = useMutation({
-    mutationFn: () => {
-      return deposit(amount);
-    },
+  const { mutate: depositFun, isLoading: depositLoading } = useMutation({
+    mutationFn: () => deposit(amount),
     onSuccess: () => {
-      console.log("first");
       queryClient.invalidateQueries(["balance"]);
+      setAmount(0);
+      document.getElementById("amount").value = "";
     },
   });
 
-  // console.log(dData);
-  // const depositFun = dData.mutate;
-  // console.log("this is profile", profile);
-  // console.log("this is transactions", transactionsData);
-  // console.log("this is balance", balanceData);
+  // Withdraw funds
+  const [amountWit, setAmountWit] = useState(0);
+  const { mutate: withdrawalFun, isLoading: withdrawalLoading } = useMutation({
+    mutationFn: () => withdrawal(amountWit),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["balance"]);
+      setAmountWit(0);
+      document.getElementById("amountWit").value = "";
+    },
+  });
+  const [amount, setAmount] = useState(0);
+  const handleBalanceSubmit = (e) => {
+    e.preventDefault();
+    // console.log(e.target.amount.value);
+  };
 
-  // console.log("this is balance", balanceData);
-  // const { data: transactionsData } = useQuery({
-  //   queryKey: ["transactions"],
-  //   queryFn: () => transactions(),
-  // });
-
-  //   const profiles = profile.data?.map((item) => {
-  //     <h1>{item}</h1>;
-  //   });
   if (!user) return <Navigate to="/" />;
   if (!profile) return <div>not found!</div>;
-  //   if (!balanceData) return <div>not found!</div>;
-  // if (!transactionsData) return <div>not found!</div>;
-  // const {
-  //   account: accountTransc,
-  //   createdAt,
-  //   username: usernameTransc,
-  // } = transactionsData;
+
   const { username, account, image } = profile;
 
-  console.table(balanceData);
   return (
-    <div className="flex flex-col justify-center text-center m-10">
-      <h1 className="m-10 font-bold">{`Name: ${username}`}</h1>
-      <h1>{`Account: ${account}`}</h1>
-      <img
-        className="place-self-center m-10 w-[280px] h-[280px]"
-        src={`https://coded-projects-api.herokuapp.com${image}`}
-        alt="img"
-      />
-      <button
+    <div className="flex flex-col justify-center items-center  bg-gradient-to-r from-blue-300 to-indigo-400 min-h-screen">
+      {/* <div
         onClick={() => {
-          balanceFun();
           navigate("/transactions");
         }}
-        className="place-self-center h-20 w-[30vh] border-solid rounded bg-gray-800 text-white mb-5"
+      > */}
+      <ProfileCard
+        username={username}
+        account={account}
+        image={image}
+        balance={balanceData}
+      />
+      {/* </div> */}
+      <button
+        onClick={() => {
+          navigate("/transactions");
+        }}
+        className="h-20 w-80 mt-4 mb-2 bg-gray-800 text-white rounded-full mt-5 flex items-center justify-center hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
       >
-        {`Balance: ${balanceData} KD`}
+        {`Balance: ${balanceData} KD `}
       </button>
-      <form onSubmit={handleAddFunds} className="mb-4">
-        <label htmlFor="amount">Amount:</label>
+
+      {/* Tabs Starts */}
+
+      <div className="flex flex-col bg-gradient-to-br from-gray-50 to-indigo-200 rounded-md p-4 shadow-xl mt-4">
+        <div className="flex flex-col ">
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => handleTabClick("tab1")}
+              className={`px-4 py-2 mr-2 rounded ${
+                selectedTab === "tab1"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Deposit
+            </button>
+            <button
+              onClick={() => handleTabClick("tab2")}
+              className={`px-4 py-2 rounded ${
+                selectedTab === "tab2"
+                  ? "bg-red-500 hover:bg-red-600  text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Withdraw
+            </button>
+          </div>
+          <div>
+            {selectedTab === "tab1" && (
+              <form onSubmit={handleBalanceSubmit} className="mt-8">
+                <label htmlFor="amount" className="mr-2">
+                  Amount:
+                </label>
+                <input
+                  className="bg-gray-100  px-2 py-1 rounded"
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  placeholder="amount"
+                  required
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  onClick={depositFun}
+                  disabled={depositLoading}
+                  className="w-40 h-9  bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
+                >
+                  {depositLoading ? "Adding Funds..." : "Add Funds"}
+                </button>
+              </form>
+            )}
+            {selectedTab === "tab2" && (
+              <form onSubmit={handleBalanceSubmit} className="mt-8">
+                <label htmlFor="amount" className="mr-2">
+                  Amount:
+                </label>
+                <input
+                  className="bg-gray-100 px-2 py-1 rounded"
+                  placeholder="amount"
+                  type="number"
+                  id="amountWit"
+                  name="amountWit"
+                  required
+                  onChange={(e) => setAmountWit(e.target.value)}
+                />
+
+                <button
+                  type="submit"
+                  onClick={withdrawalFun}
+                  disabled={withdrawalLoading}
+                  className="w-40 h-9  bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
+                >
+                  {withdrawalLoading ? "Withdrawing..." : "Witdrawal"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Ends */}
+
+      {/* <label htmlFor="amount" className="mr-2">
+          Amount:
+        </label>
         <input
-          className="bg-gray-300"
+          className="bg-gray-100 px-2 py-1 rounded"
           type="number"
           id="amount"
           name="amount"
           required
+          onChange={(e) => setAmount(e.target.value)}
         />
         <button
           type="submit"
           onClick={depositFun}
-          disabled={depositFun.isLoading}
-          className="w-[15vh] h-[3vh] border-solid rounded bg-green-800 mt-2 text-white"
+          disabled={depositLoading}
+          className="w-40 h-9  bg-green-500 hover:bg-green-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
         >
-          Add Funds
-        </button>
-      </form>
-      <form onSubmit={handleWit}>
-        <label htmlFor="amount">Amount:</label>
+          {depositLoading ? "Adding Funds..." : "Add Funds"}
+        </button> */}
+
+      {/* <form onSubmit={handleBalanceSubmit} className="mt-4 mb-24">
+        <label htmlFor="amount" className="mr-2">
+          Amount:
+        </label>
         <input
-          className="bg-gray-300"
+          className="bg-gray-100 px-2 py-1 rounded"
           type="number"
-          id="amount"
+          id="amountWit"
           name="amountWit"
           required
+          onChange={(e) => setAmountWit(e.target.value)}
         />
+
         <button
           type="submit"
           onClick={withdrawalFun}
-          disabled={withdrawalFun.isLoading}
-          className="w-[15vh] h-[3vh] border-solid rounded bg-red-800 mt-2 text-white"
+          disabled={withdrawalLoading}
+          className="w-40 h-9  bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transition duration-300 ease-in-out ml-4"
         >
-          Withdrawal
+          {withdrawalLoading ? "Withdrawing..." : "witdrawal"}
         </button>
-      </form>
-      {/* <button onClick={withdrawalFun}>Reduce 1</button> */}
+      </form> */}
     </div>
   );
 };
